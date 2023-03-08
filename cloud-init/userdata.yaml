@@ -1,0 +1,12 @@
+#cloud-config
+users:
+  - name: ${user}
+    ssh-authorized-keys:
+    - ${sshpubkey}
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+package_update: true
+package_upgrade: true
+packages:
+- vim
