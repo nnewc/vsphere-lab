@@ -7,6 +7,10 @@ terraform {
   }
 }
 
+locals {
+  cluster-name = "vsphere-lab"
+}
+
 provider "vsphere" {
   user           = "${var.vsphere_user}"
   password       = "${var.vsphere_password}"
@@ -35,6 +39,17 @@ data "vsphere_network" "network" {
 data "vsphere_virtual_machine" "template" {
   name          = "${var.vsphere_virtual_machine_template}"
   datacenter_id = "${data.vsphere_datacenter.datacenter.id}"
+}
+
+resource "tls_private_key" "ssh" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "local_file" "ssh_pem" {
+  filename        = "cluster/${local.cluster-name}.pem"
+  content         = tls_private_key.ssh.private_key_pem
+  file_permission = "0600"
 }
 
 resource "vsphere_virtual_machine" "master-vm" {
@@ -75,10 +90,7 @@ resource "vsphere_virtual_machine" "master-vm" {
       hostname = "${format("${var.vsphere_virtual_machine_name}-master-%03d",count.index)}"
     }))
     "guestinfo.metadata.encoding" = "base64"
-    "guestinfo.userdata"          = base64encode(templatefile("${path.module}/cloud-init/userdata.yaml", {
-      user = var.node_user
-      sshpubkey = var.ssh_pubkey
-    }))
+    "guestinfo.userdata"          = data.cloudinit_config.this.rendered
     "guestinfo.userdata.encoding" = "base64"
   }
 }
@@ -121,10 +133,7 @@ resource "vsphere_virtual_machine" "worker-vm" {
       hostname = "${format("${var.vsphere_virtual_machine_name}-worker-%03d",count.index)}"
     }))
     "guestinfo.metadata.encoding" = "base64"
-    "guestinfo.userdata"          = base64encode(templatefile("${path.module}/cloud-init/userdata.yaml", {
-      user = var.node_user
-      sshpubkey = var.ssh_pubkey
-    }))
+    "guestinfo.userdata"          = "${data.cloudinit_config.this.rendered}"
     "guestinfo.userdata.encoding" = "base64"
   }
 }

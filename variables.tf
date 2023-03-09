@@ -121,8 +121,13 @@ variable "ssh_pubkey" {
   default = ""
 }
 
-variable "node_user" {
-  description = "default user to log in to nodes"
-  type = string
-  default = "ubuntu"
+variable "download" {
+  description = "Toggle best effort download of rke2 dependencies, if disabled, dependencies are assumed to exist in $PATH"
+  type        = bool
+  default     = true
 }
+
+# variable "node_user" {
+#   description = "default user to log in to nodes"
+#   type = string
+# }

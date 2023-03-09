@@ -2,7 +2,7 @@
 users:
   - name: ${user}
     ssh-authorized-keys:
-    - ${sshpubkey}
+    - ${ssh_pubkey}
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     groups: sudo
     shell: /bin/bash
