@@ -1,0 +1,42 @@
+#cloud-config
+# For more info on the format of this user-data file see the following links:
+# https://discuss.hashicorp.com/t/wrong-indent-with-multiline-content-to-cloud-init-write-files-content-directives/35011/2
+# https://developer.hashicorp.com/terraform/language/functions/templatefile#generating-json-or-yaml-from-a-template
+
+users:
+  - name: ${user}
+    ssh-authorized-keys:
+    - ${ssh_pubkey}
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+   # etcd User is Required for Installing with CIS Profile Enabled
+  - name: etcd
+    gecos: System Account for Running etcd Service
+    sudo: false
+    system: true
+packages:
+- vim
+- bash-completion
+
+write_files:
+  # These sysctl settings are for k8s kubelet "protect-kernel-defaults" CIS Setting
+- content: |
+    kernel.panic = 10
+    kernel.panic_on_oops = 1
+    kernel.panic_ps = 1
+    vm.overcommit_memory = 1
+    vm.panic_on_oom = 0
+  path: /etc/sysctl.d/99-kubeletSettings.conf
+
+# - content: |
+#     ${indent(2, rke2-audit)}
+# path: /etc/rancher/rke2/audit-policy.yaml
+
+# # applies base RKE2 configuration on all nodes. Note: server option is by Terraform after IP's are known.
+# - content: |
+#     ${yamlencode(rke2-config)}
+#   path: /etc/rancher/rke2/config.yaml
+
+runcmd:
+- sysctl -p /etc/sysctl.d/99-kubeletSettings.conf

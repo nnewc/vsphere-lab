@@ -13,11 +13,6 @@ variable "vsphere_datastore" {
   default = "####"
 }
 
-variable "cluster_name" {
-  type = string
-  default = "my-cluster"
-}
-
 variable "cpu_count" {
   type = number
   default = 4
@@ -59,7 +54,7 @@ variable "clone_from" {
 
 variable "rke2_version" {
   type = string
-  default = "v1.24.10+rke2r1"
+  default = "v1.20.8+rke2r1"
 }
 
 variable "vm_template_name" {
@@ -142,9 +137,3 @@ variable "download" {
 #   description = "default user to log in to nodes"
 #   type = string
 # }
-
-variable "kubevip_ip" {
-  description = "An ip address used for kube-vip"
-  type = string
-  default = ""
-}
