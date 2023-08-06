@@ -29,14 +29,5 @@ write_files:
     vm.panic_on_oom = 0
   path: /etc/sysctl.d/99-kubeletSettings.conf
 
-# - content: |
-#     ${indent(2, rke2-audit)}
-# path: /etc/rancher/rke2/audit-policy.yaml
-
-# # applies base RKE2 configuration on all nodes. Note: server option is by Terraform after IP's are known.
-# - content: |
-#     ${yamlencode(rke2-config)}
-#   path: /etc/rancher/rke2/config.yaml
-
 runcmd:
 - sysctl -p /etc/sysctl.d/99-kubeletSettings.conf
