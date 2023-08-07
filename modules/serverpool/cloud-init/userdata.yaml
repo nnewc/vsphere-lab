@@ -18,16 +18,7 @@ users:
 packages:
 - vim
 - bash-completion
-
-write_files:
-  # These sysctl settings are for k8s kubelet "protect-kernel-defaults" CIS Setting
-- content: |
-    kernel.panic = 10
-    kernel.panic_on_oops = 1
-    kernel.panic_ps = 1
-    vm.overcommit_memory = 1
-    vm.panic_on_oom = 0
-  path: /etc/sysctl.d/99-kubeletSettings.conf
-
 runcmd:
-- sysctl -p /etc/sysctl.d/99-kubeletSettings.conf
+- sysctl -p /etc/sysctl.d/90-kubelet.conf
+- sudo systemctl disable firewalld
+- sudo systemctl stop firewalld

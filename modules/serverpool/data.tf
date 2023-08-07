@@ -1,18 +1,86 @@
-data "cloudinit_config" "master_cloudconfig" {
+
+
+
+
+data "cloudinit_config" "bootstrap_cloudconfig" {
   gzip          = false
   base64_encode = true
 
   # Main cloud-init config file
   part {
-    filename     = "cloud-config.yaml"
     content_type = "text/cloud-config"
-    content = templatefile("${path.module}/cloud-init/userdata.yaml", {
-      ssh_pubkey = var.ssh_pubkey
-      user       = var.ssh_user
-    })
+    filename     = "write-files.yaml"
+    content = yamlencode(
+      {
+        "write_files" : [
+          # write_files examples...
+          # {
+          #   "path" : "/etc/foo.conf",
+          #   "content" : "foo contents",
+          # },
+          # {
+          #   "path" : "/etc/bar.conf",
+          #   "content" : file("bar.conf"),
+          # },
+          # {
+          #   "path" : "/etc/baz.conf",
+          #   "content" : templatefile("baz.tpl.conf", { SOME_VAR = "qux" }),
+          # },
+          {
+            "path": "/etc/rancher/rke2/audit.yaml",
+            "content": file("${path.module}/config/rke2-audit-policy.yaml")
+          },
+          {
+            "path": "/etc/rancher/rke2/config.yaml"
+            "content": file("${path.module}/config/rke2-config.yaml")
+          },
+          {
+            "path": "/etc/sysctl.d/90-kubelet.conf",
+            "content": file("${path.module}/config/90-kubelet.conf")
+          }
+        ],
+      }
+    )
   }
+  part {
+      filename     = "base-userdata.yaml"
+      content_type = "text/cloud-config"
+      content = templatefile("${path.module}/cloud-init/userdata.yaml", {
+        ssh_pubkey = var.ssh_pubkey
+        user       = var.ssh_user
+      })
+    }
 
+  part {
+      content_type = "text/cloud-config"
+      filename     = "rke2.yaml"
+      merge_type = "list(append)+dict(recurse_array)+str()"
+      content = yamlencode({
+        "runcmd": [
+          "sysctl -p /etc/sysctl.d/90-kubelet.conf",
+          "curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${var.rke2_version} sh -",
+          "systemctl enable rke2-server",
+          "systemctl start rke2-server",
+          "echo \"export KUBECONFIG=/etc/rancher/rke2/rke2.yaml\" >> /home/${ssh_user}/.bashrc",
+          "echo \"export PATH=$PATH:/var/lib/rancher/rke2/bin\" >> /home/${ssh_user}/.bashrc",
+          "echo \"export CRI_CONFIG_FILE=/var/lib/rancher/rke2/agent/etc/crictl.yaml\" >> /home/${ssh_user}/.bashrc"
+        ]
+      })
+    }  
 
+  part {
+      filename     = "hello-script.sh"
+      content_type = "text/x-shellscript"
+
+      content = file("${path.module}/scripts/hello.sh")
+    }
+}
+
+data "cloudinit_config" "master_cloudconfig" {
+  gzip          = false
+  base64_encode = true
+
+  # Main cloud-init config file
   part {
     content_type = "text/cloud-config"
     filename     = "cloud.yaml"
@@ -33,33 +101,52 @@ data "cloudinit_config" "master_cloudconfig" {
           #   "content" : templatefile("baz.tpl.conf", { SOME_VAR = "qux" }),
           # },
           {
-            "path": "/etc/sysctl.d/99-kubeletSettings.conf",
-            "content": <<EOT
-              kernel.panic = 10
-              kernel.panic_on_oops = 1
-              kernel.panic_ps = 1
-              vm.overcommit_memory = 1
-              vm.panic_on_oom = 0
-            EOT
-          }
-          {
             "path": "/etc/rancher/rke2/audit.yaml",
             "content": file("${path.module}/config/rke2-audit-policy.yaml")
           },
           {
             "path": "/etc/rancher/rke2/config.yaml"
             "content": file("${path.module}/config/rke2-config.yaml")
+          },
+          {
+            "path": "/etc/sysctl.d/90-kubelet.conf",
+            "content": file("${path.module}/config/90-kubelet.conf")
           }
         ],
       }
     )
   }
   part {
-    filename     = "hello-script.sh"
-    content_type = "text/x-shellscript"
+      filename     = "cloud-config.yaml"
+      content_type = "text/cloud-config"
+      content = templatefile("${path.module}/cloud-init/userdata.yaml", {
+        ssh_pubkey = var.ssh_pubkey
+        user       = var.ssh_user
+      })
+    }
 
-    content = file("${path.module}/scripts/hello.sh")
-  }
+    part {
+      content_type = "text/cloud-config"
+      filename     = "cloud.yaml"
+      merge_type = "list(append)+dict(recurse_array)+str()"
+      content = yamlencode({
+        "runcmd": [
+          "echo \"server: ${vsphere_virtual_machine.master-bootstrap.default_ip_address}\" >> /etc/rancher/rke2/config.yaml",
+          "echo \"tls-san:\n",
+          "curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${var.rke2_version} sh -",
+          "systemctl enable rke2-server",
+          "systemctl start rke2-server",
+          "echo \"export KUBECONFIG=/etc/rancher/rke2/rke2.yaml\" >> /home/${ssh_user}/.bashrc",
+          "echo \"export PATH=$PATH:/var/lib/rancher/rke2/bin\" >> /home/${ssh_user}/.bashrc"
+        ]})
+    }
+
+    part {
+      filename     = "hello-script.sh"
+      content_type = "text/x-shellscript"
+
+      content = file("${path.module}/scripts/hello.sh")
+    }
 }
 
 
@@ -74,10 +161,50 @@ data "cloudinit_config" "worker_cloudconfig" {
     content = templatefile("${path.module}/cloud-init/userdata.yaml", {
       ssh_pubkey = var.ssh_pubkey
       user       = var.ssh_user
-      rke2-audit = ""
-      rke2-config = templatefile("${path.module}/config/rke2-config.yaml", {})
     })
   }
+
+  part {
+    filename = "cloud-config.yaml"
+    content_type = "text/cloud-config"
+    content = yamlencode({
+      "write_files":[{
+        "path": "/etc/rancher/rke2/config.yaml",
+        "content": <<EOT
+          token: i-am-a-token
+          server: https://${vsphere_virtual_machine.master-bootstrap.default_ip_address}:9345
+          write-kubeconfig-mode: 0640
+          profile: cis-1.6
+          kube-apiserver-arg:
+          - authorization-mode=RBAC,Node
+          kubelet-arg:
+          - protect-kernel-defaults=true
+          - read-only-port=0
+          - authorization-mode=Webhook
+          EOT
+      },
+      {
+        "path": "/etc/sysctl.d/90-kubelet.conf",
+        "content": file("${path.module}/config/90-kubelet.conf")
+      }
+      ] 
+    })
+  }
+
+  part {
+      content_type = "text/cloud-config"
+      filename     = "cloud.yaml"
+      merge_type = "list(append)+dict(recurse_array)+str()"
+      content = yamlencode({
+        "runcmd": [
+          "sysctl -p /etc/sysctl.d/90-kubelet.conf",
+          "curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE=agent INSTALL_RKE2_VERSION=${var.rke2_version} sh -",
+          "systemctl enable rke2-agent",
+          "systemctl start rke2-agent",
+          "mkdir /home/${ssh_user}/kube",
+          "cp /etc/rancher/rke2/rke2.yaml /home/${ssh_user}/kube/config",
+        ]})
+    }
 }
 
 data "vsphere_datacenter" "datacenter" {

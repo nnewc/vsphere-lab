@@ -55,7 +55,7 @@ resource "vsphere_virtual_machine" "master-bootstrap" {
       hostname = "${var.vsphere_virtual_machine_name}-master-000"
     }))
     "guestinfo.metadata.encoding" = "base64"
-    "guestinfo.userdata"          = "${data.cloudinit_config.master_cloudconfig.rendered}"
+    "guestinfo.userdata"          = "${data.cloudinit_config.bootstrap_cloudconfig.rendered}"
     "guestinfo.userdata.encoding" = "base64"
   }
 }
@@ -70,7 +70,7 @@ resource "vsphere_virtual_machine" "master_nodes" {
 
   count            = var.ha_controlplane ? 2 : 0
 
-  name             = "${format("${var.vsphere_virtual_machine_name}-master-%03d-disk",count.index + 1)}"
+  name             = "${format("${var.vsphere_virtual_machine_name}-master-%03d",count.index + 1)}"
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
   num_cpus         = var.cpu_count
