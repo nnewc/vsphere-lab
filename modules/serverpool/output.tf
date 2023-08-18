@@ -10,6 +10,6 @@ output "worker-ip" {
 #    value = "${vsphere_virtual_machine.master-vm[0].default_ip_address}"
 # }
 
-output "userdata" {
-   value = "${data.cloudinit_config.master_cloudconfig}"
-}
+# output "userdata" {
+#    value = "${data.cloudinit_config.master_cloudconfig}"
+# }

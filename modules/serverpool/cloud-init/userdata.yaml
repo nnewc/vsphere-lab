@@ -18,7 +18,9 @@ users:
 packages:
 - vim
 - bash-completion
+- jq
 runcmd:
 - sysctl -p /etc/sysctl.d/90-kubelet.conf
 - sudo systemctl disable firewalld
 - sudo systemctl stop firewalld
+

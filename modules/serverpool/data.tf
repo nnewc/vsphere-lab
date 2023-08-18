@@ -1,7 +1,3 @@
-
-
-
-
 data "cloudinit_config" "bootstrap_cloudconfig" {
   gzip          = false
   base64_encode = true
@@ -57,13 +53,14 @@ data "cloudinit_config" "bootstrap_cloudconfig" {
       merge_type = "list(append)+dict(recurse_array)+str()"
       content = yamlencode({
         "runcmd": [
-          "sysctl -p /etc/sysctl.d/90-kubelet.conf",
+          # "echo \"tls-san:\" >> /etc/rancher/rke2/config.yaml",
+          # "echo \"- ${vsphere_virtual_machine.master-bootstrap.default_ip_address}.nip.io",
           "curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${var.rke2_version} sh -",
           "systemctl enable rke2-server",
           "systemctl start rke2-server",
-          "echo \"export KUBECONFIG=/etc/rancher/rke2/rke2.yaml\" >> /home/${ssh_user}/.bashrc",
-          "echo \"export PATH=$PATH:/var/lib/rancher/rke2/bin\" >> /home/${ssh_user}/.bashrc",
-          "echo \"export CRI_CONFIG_FILE=/var/lib/rancher/rke2/agent/etc/crictl.yaml\" >> /home/${ssh_user}/.bashrc"
+          "echo \"export KUBECONFIG=/etc/rancher/rke2/rke2.yaml\" >> /home/${var.ssh_user}/.bashrc",
+          "echo \"export PATH=$PATH:/var/lib/rancher/rke2/bin\" >> /home/${var.ssh_user}/.bashrc",
+          "echo \"export CRI_CONFIG_FILE=/var/lib/rancher/rke2/agent/etc/crictl.yaml\" >> /home/${var.ssh_user}/.bashrc"
         ]
       })
     }  
@@ -131,13 +128,13 @@ data "cloudinit_config" "master_cloudconfig" {
       merge_type = "list(append)+dict(recurse_array)+str()"
       content = yamlencode({
         "runcmd": [
-          "echo \"server: ${vsphere_virtual_machine.master-bootstrap.default_ip_address}\" >> /etc/rancher/rke2/config.yaml",
-          "echo \"tls-san:\n",
+          "echo \"server: https://${vsphere_virtual_machine.master-bootstrap.default_ip_address}:9345\" >> /etc/rancher/rke2/config.yaml",
           "curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${var.rke2_version} sh -",
           "systemctl enable rke2-server",
           "systemctl start rke2-server",
-          "echo \"export KUBECONFIG=/etc/rancher/rke2/rke2.yaml\" >> /home/${ssh_user}/.bashrc",
-          "echo \"export PATH=$PATH:/var/lib/rancher/rke2/bin\" >> /home/${ssh_user}/.bashrc"
+          "echo \"export KUBECONFIG=/etc/rancher/rke2/rke2.yaml\" >> /home/${var.ssh_user}/.bashrc",
+          "echo \"export PATH=$PATH:/var/lib/rancher/rke2/bin\" >> /home/${var.ssh_user}/.bashrc",
+          "echo \"export CRI_CONFIG_FILE=/var/lib/rancher/rke2/agent/etc/crictl.yaml\" >> /home/${var.ssh_user}/.bashrc"
         ]})
     }
 
@@ -201,8 +198,10 @@ data "cloudinit_config" "worker_cloudconfig" {
           "curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE=agent INSTALL_RKE2_VERSION=${var.rke2_version} sh -",
           "systemctl enable rke2-agent",
           "systemctl start rke2-agent",
-          "mkdir /home/${ssh_user}/kube",
-          "cp /etc/rancher/rke2/rke2.yaml /home/${ssh_user}/kube/config",
+          "mkdir /home/${var.ssh_user}/kube",
+          "echo \"export KUBECONFIG=/etc/rancher/rke2/rke2.yaml\" >> /home/${var.ssh_user}/.bashrc",
+          "echo \"export PATH=$PATH:/var/lib/rancher/rke2/bin\" >> /home/${var.ssh_user}/.bashrc",
+          "echo \"export CRI_CONFIG_FILE=/var/lib/rancher/rke2/agent/etc/crictl.yaml\" >> /home/${var.ssh_user}/.bashrc"
         ]})
     }
 }
