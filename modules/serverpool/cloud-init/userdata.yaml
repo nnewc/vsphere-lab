@@ -23,4 +23,6 @@ runcmd:
 - sysctl -p /etc/sysctl.d/90-kubelet.conf
 - sudo systemctl disable firewalld
 - sudo systemctl stop firewalld
+- mkdir -p /var/run/istio-cni && semanage fcontext -a -t container_file_t /var/run/istio-cni && restorecon -v /var/run/istio-cni
+
 

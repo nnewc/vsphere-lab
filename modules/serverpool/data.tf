@@ -199,9 +199,12 @@ data "cloudinit_config" "worker_cloudconfig" {
           "systemctl enable rke2-agent",
           "systemctl start rke2-agent",
           "mkdir /home/${var.ssh_user}/kube",
+          # configure bash environment
           "echo \"export KUBECONFIG=/etc/rancher/rke2/rke2.yaml\" >> /home/${var.ssh_user}/.bashrc",
           "echo \"export PATH=$PATH:/var/lib/rancher/rke2/bin\" >> /home/${var.ssh_user}/.bashrc",
-          "echo \"export CRI_CONFIG_FILE=/var/lib/rancher/rke2/agent/etc/crictl.yaml\" >> /home/${var.ssh_user}/.bashrc"
+          "echo \"export CRI_CONFIG_FILE=/var/lib/rancher/rke2/agent/etc/crictl.yaml\" >> /home/${var.ssh_user}/.bashrc",
+          # set selinux context for istio-cni
+          "mkdir -p /var/run/istio-cni && semanage fcontext -a -t container_file_t /var/run/istio-cni && restorecon -v /var/run/istio-cni"
         ]})
     }
 }
