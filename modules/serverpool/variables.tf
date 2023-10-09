@@ -10,7 +10,12 @@ variable "vsphere_compute_cluster" {
 
 variable "vsphere_datastore" {
   type = string
-  default = "####"
+  default = ""
+}
+
+variable "vsphere_folder" {
+  type = string
+  default = ""
 }
 
 variable "cpu_count" {
