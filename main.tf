@@ -14,17 +14,17 @@ provider "vsphere" {
   allow_unverified_ssl = true
 }
 
-resource "tls_private_key" "ssh" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
+# resource "tls_private_key" "ssh" {
+#   algorithm = "RSA"
+#   rsa_bits  = 4096
+# }
 
 
-resource "local_file" "ssh_pem" {
-  filename        = "cluster/${var.cluster_name}.pem"
-  content         = tls_private_key.ssh.private_key_pem
-  file_permission = "0600"
-}
+# resource "local_file" "ssh_pem" {
+#   filename        = "cluster/${var.cluster_name}.pem"
+#   content         = tls_private_key.ssh.private_key_pem
+#   file_permission = "0600"
+# }
 
 module "nodes" {
   source = "./modules/serverpool"
@@ -39,6 +39,7 @@ module "nodes" {
   vsphere_datacenter               = var.vsphere_datacenter
   vsphere_datastore                = var.vsphere_datastore
   vsphere_compute_cluster          = var.vsphere_compute_cluster
+  vsphere_folder                   = var.vsphere_folder
   ssh_pubkey                       = var.ssh_pubkey
   ssh_user                         = var.ssh_user
   master_node_count                = var.master_node_count
