@@ -25,7 +25,7 @@ variable "cpu_count" {
 
 variable "memory_size" {
   type = number
-  default = 4096
+  default = 8192
 }
 
 variable "node_master_disk_size" {
@@ -59,7 +59,7 @@ variable "clone_from" {
 
 variable "rke2_version" {
   type = string
-  default = "v1.24.10+rke2r1"
+  default = "v1.24.17+rke2r1"
 }
 
 variable "vm_template_name" {
@@ -103,6 +103,11 @@ variable "vsphere_network" {}
 variable "vsphere_virtual_machine_template" {
   type = string
   description = "vsphere virtual machine template that the virtual machine will be cloned from. empty by default."
+}
+
+variable "vsphere_folder" {
+  type = string
+  default = ""
 }
 
 # the name of the vsphere virtual machine that is created. empty by default.

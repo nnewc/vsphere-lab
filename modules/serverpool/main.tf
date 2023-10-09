@@ -7,6 +7,7 @@ resource "vsphere_virtual_machine" "master-bootstrap" {
   name             = "${var.vsphere_virtual_machine_name}-master-000"
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
+  folder           = var.vsphere_folder
   num_cpus         = var.cpu_count
   memory           = var.memory_size
   guest_id         = "other4xLinux64Guest"
@@ -17,22 +18,23 @@ resource "vsphere_virtual_machine" "master-bootstrap" {
   #   remote_ovf_url = "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.ova"
   # }
 
-  # provisioner "remote-exec" {
-  #   inline = [
-  #   "echo 'Waiting for cloud-init to complete...'",
-  #   "cloud-init status --wait > /dev/null",
-  #   "echo 'Completed cloud-init!'",
-  #   ]
-
-  #   connection {
-  #     type        = "ssh"
-  #     host        = self.default_ip_address
-  #     user        = var.ssh_user
-  #     password    = var.ssh_password
-  #     agent       = false
-  #     # private_key = tls_private_key.global_key.private_key_openssh
-  #   }
-  # }
+  provisioner "remote-exec" {
+    
+    inline = [
+      "echo 'Waiting for cloud-init to complete...'",
+      "cloud-init status --wait > /dev/null",
+      "echo 'Completed cloud-init!'",
+    ]
+    
+    connection {
+      type        = "ssh"
+      host        = self.default_ip_address
+      user        = var.ssh_user
+      certificate = var.ssh_pubkey
+      agent       = true
+      script_path = "/home/${var.ssh_user}/user-data-check.sh"
+    }
+  }
   
   network_interface {
     network_id = data.vsphere_network.network.id
