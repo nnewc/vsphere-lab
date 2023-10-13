@@ -33,6 +33,20 @@ data "cloudinit_config" "bootstrap_cloudconfig" {
           {
             "path": "/etc/sysctl.d/90-kubelet.conf",
             "content": file("${path.module}/config/90-kubelet.conf")
+          },
+          {
+            "path": "/etc/rancher/rke2/registries.yaml",
+            "content": <<-EOT
+              mirrors:
+                docker.io:
+                  endpoint:
+                    - "https://${var.system_default_registry}"
+              configs:
+                "${var.system_default_registry}":
+                  auth:
+                    username: "${var.registry_user}"
+                    password: "${var.registry_password}"
+              EOT
           }
         ],
       }
@@ -65,12 +79,12 @@ data "cloudinit_config" "bootstrap_cloudconfig" {
       })
     }  
 
-  part {
-      filename     = "hello-script.sh"
-      content_type = "text/x-shellscript"
+  # part {
+  #     filename     = "hello-script.sh"
+  #     content_type = "text/x-shellscript"
 
-      content = file("${path.module}/scripts/hello.sh")
-    }
+  #     content = file("${path.module}/scripts/hello.sh")
+  #   }
 }
 
 data "cloudinit_config" "master_cloudconfig" {
@@ -108,6 +122,20 @@ data "cloudinit_config" "master_cloudconfig" {
           {
             "path": "/etc/sysctl.d/90-kubelet.conf",
             "content": file("${path.module}/config/90-kubelet.conf")
+          },
+          {
+            "path": "/etc/rancher/rke2/registries.yaml",
+            "content": <<-EOT
+              mirrors:
+                docker.io:
+                  endpoint:
+                    - "https://${var.system_default_registry}"
+              configs:
+                "${var.system_default_registry}":
+                  auth:
+                    username: "${var.registry_user}"
+                    password: "${var.registry_password}"
+            EOT
           }
         ],
       }
@@ -138,12 +166,12 @@ data "cloudinit_config" "master_cloudconfig" {
         ]})
     }
 
-    part {
-      filename     = "hello-script.sh"
-      content_type = "text/x-shellscript"
+    # part {
+    #   filename     = "hello-script.sh"
+    #   content_type = "text/x-shellscript"
 
-      content = file("${path.module}/scripts/hello.sh")
-    }
+    #   content = file("${path.module}/scripts/hello.sh")
+    # }
 }
 
 
@@ -157,7 +185,7 @@ data "cloudinit_config" "worker_cloudconfig" {
     content_type = "text/cloud-config"
     content = templatefile("${path.module}/cloud-init/userdata.yaml", {
       ssh_pubkey = var.ssh_pubkey
-      user       = var.ssh_user
+        user       = var.ssh_user
     })
   }
 
@@ -167,7 +195,7 @@ data "cloudinit_config" "worker_cloudconfig" {
     content = yamlencode({
       "write_files":[{
         "path": "/etc/rancher/rke2/config.yaml",
-        "content": <<EOT
+        "content": <<-EOT
           token: i-am-a-token
           server: https://${vsphere_virtual_machine.master-bootstrap.default_ip_address}:9345
           write-kubeconfig-mode: 0640
@@ -183,7 +211,21 @@ data "cloudinit_config" "worker_cloudconfig" {
       {
         "path": "/etc/sysctl.d/90-kubelet.conf",
         "content": file("${path.module}/config/90-kubelet.conf")
-      }
+      },
+      {
+          "path": "/etc/rancher/rke2/registries.yaml",
+          "content": <<-EOT
+          mirrors:
+            docker.io:
+              endpoint:
+              - "https://${var.system_default_registry}"
+          configs:
+            "${var.system_default_registry}":
+              auth:
+                username: "${var.registry_user}"
+                password: "${var.registry_password}"
+          EOT
+          }
       ] 
     })
   }

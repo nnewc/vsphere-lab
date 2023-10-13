@@ -138,7 +138,27 @@ variable "download" {
   default     = true
 }
 
-# variable "node_user" {
-#   description = "default user to log in to nodes"
-#   type = string
-# }
+variable "kubeconfig_filename" {
+  type = string
+  default = "rke2-kubeconfig.yaml"
+}
+
+variable "registry" {
+  type = string
+  default = ""
+}
+
+variable "registry_user" {
+  type = string
+  default = ""
+}
+
+variable "registry_password" {
+  type = string
+  default = ""
+}
+
+variable "system_default_registry" {
+  type = string
+  default = ""
+}

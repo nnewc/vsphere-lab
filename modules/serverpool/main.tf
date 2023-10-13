@@ -1,3 +1,4 @@
+
 locals {
   cluster-name = "vsphere-lab"
 }
@@ -60,6 +61,14 @@ resource "vsphere_virtual_machine" "master-bootstrap" {
     "guestinfo.userdata"          = "${data.cloudinit_config.bootstrap_cloudconfig.rendered}"
     "guestinfo.userdata.encoding" = "base64"
   }
+
+  # workaround for this isssue: https://github.com/hashicorp/terraform-provider-vsphere/issues/1902
+  lifecycle {
+    ignore_changes = [
+      ept_rvi_mode,
+      hv_mode
+    ]
+  }
 }
 
 
@@ -75,6 +84,7 @@ resource "vsphere_virtual_machine" "master_nodes" {
   name             = "${format("${var.vsphere_virtual_machine_name}-master-%03d",count.index + 1)}"
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
+  folder           = var.vsphere_folder
   num_cpus         = var.cpu_count
   memory           = var.memory_size
   guest_id         = "other4xLinux64Guest"
@@ -110,6 +120,14 @@ resource "vsphere_virtual_machine" "master_nodes" {
     "guestinfo.userdata"          = "${data.cloudinit_config.master_cloudconfig.rendered}"
     "guestinfo.userdata.encoding" = "base64"
   }
+
+  # workaround for this isssue: https://github.com/hashicorp/terraform-provider-vsphere/issues/1902
+  lifecycle {
+    ignore_changes = [
+      ept_rvi_mode,
+      hv_mode
+    ]
+  }
 }
 
 resource "vsphere_virtual_machine" "worker-vm" {
@@ -118,6 +136,7 @@ resource "vsphere_virtual_machine" "worker-vm" {
   name             = "${format("${var.vsphere_virtual_machine_name}-worker-%03d",count.index)}"
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
+  folder           = var.vsphere_folder
   num_cpus         = var.cpu_count
   memory           = var.memory_size
   guest_id         = "other4xLinux64Guest"
@@ -153,5 +172,28 @@ resource "vsphere_virtual_machine" "worker-vm" {
     "guestinfo.userdata"          = "${data.cloudinit_config.worker_cloudconfig.rendered}"
     "guestinfo.userdata.encoding" = "base64"
   }
+
+  # workaround for this isssue: https://github.com/hashicorp/terraform-provider-vsphere/issues/1902
+  lifecycle {
+    ignore_changes = [
+      ept_rvi_mode,
+      hv_mode
+    ]
+  }
 }
+
+# resource "null_resource" "kubeconfig" {
+
+#   provisioner "local-exec" {
+#     interpreter = ["bash", "-c"]
+#     # command     = "scp ${var.ssh_user}@${vsphere_virtual_machine.master-bootstrap.default_ip_address}:/etc/rancher/rke2/rke2.yaml rke2.yaml"
+#     command = <<-EOT
+#       scp ${var.ssh_user}@${vsphere_virtual_machine.master-bootstrap.default_ip_address}:/etc/rancher/rke2/rke2.yaml rke2.yaml
+#       sed -i -e  "s/127.0.0.1/${vsphere_virtual_machine.master-bootstrap.default_ip_address}/g" rke2.yaml
+#     EOT
+#   }
+# }
+
+
+
 

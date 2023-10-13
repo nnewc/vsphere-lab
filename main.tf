@@ -2,8 +2,9 @@ terraform {
   required_providers {
     vsphere = {
       source  = "hashicorp/vsphere"
-      version = "2.2.0"
+      version = "2.5.0"
     }
+
   }
 }
 
@@ -44,8 +45,8 @@ module "nodes" {
   ssh_user                         = var.ssh_user
   master_node_count                = var.master_node_count
   ha_controlplane                  = var.ha_controlplane
-  worker_node_count = var.worker_node_count
-}
-
-
-  
+  worker_node_count                = var.worker_node_count
+  registry_user                     = var.registry_user
+  registry_password                 = var.registry_password
+  system_default_registry          = var.system_default_registry
+}  

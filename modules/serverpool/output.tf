@@ -1,4 +1,4 @@
-output "master-ip" {
+output "bootstrap-ip" {
    value = "${vsphere_virtual_machine.master-bootstrap.default_ip_address}"
 }
 
