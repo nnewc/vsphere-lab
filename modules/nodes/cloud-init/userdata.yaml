@@ -2,7 +2,6 @@
 # For more info on the format of this user-data file see the following links:
 # https://discuss.hashicorp.com/t/wrong-indent-with-multiline-content-to-cloud-init-write-files-content-directives/35011/2
 # https://developer.hashicorp.com/terraform/language/functions/templatefile#generating-json-or-yaml-from-a-template
-
 users:
   - name: ${user}
     ssh-authorized-keys:

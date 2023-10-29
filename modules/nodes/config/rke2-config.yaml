@@ -1,6 +1,7 @@
 token: i-am-a-token
 write-kubeconfig-mode: 644
 profile: cis-1.6
+secrets-encryption: true
 use-service-account-credentials: true
 kube-controller-manager-arg:
   - tls-min-version=VersionTLS12

@@ -78,13 +78,6 @@ data "cloudinit_config" "bootstrap_cloudconfig" {
         ]
       })
     }  
-
-  # part {
-  #     filename     = "hello-script.sh"
-  #     content_type = "text/x-shellscript"
-
-  #     content = file("${path.module}/scripts/hello.sh")
-  #   }
 }
 
 data "cloudinit_config" "master_cloudconfig" {

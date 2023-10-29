@@ -5,6 +5,11 @@ terraform {
       version = "2.5.0"
     }
 
+    rancher = {
+      source = "rancher/rancher2"
+      version = "3.2.0"
+    }
+
   }
 }
 
@@ -28,7 +33,7 @@ provider "vsphere" {
 # }
 
 module "nodes" {
-  source = "./modules/serverpool"
+  source = "./modules/nodes"
 
   vsphere_network                  = var.vsphere_network
   vsphere_virtual_machine_name     = var.vsphere_virtual_machine_name

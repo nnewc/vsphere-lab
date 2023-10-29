@@ -30,7 +30,7 @@ resource "local_sensitive_file" "kubeconfig_file" {
   filename = "${var.kubeconfig_filename}"
 
   provisioner "local-exec" {
-
+    
     command = "sed -i -e  \"s/127.0.0.1/${var.ssh_host}/g\" rke2.yaml"
     
   }

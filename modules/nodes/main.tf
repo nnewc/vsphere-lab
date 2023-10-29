@@ -181,19 +181,3 @@ resource "vsphere_virtual_machine" "worker-vm" {
     ]
   }
 }
-
-# resource "null_resource" "kubeconfig" {
-
-#   provisioner "local-exec" {
-#     interpreter = ["bash", "-c"]
-#     # command     = "scp ${var.ssh_user}@${vsphere_virtual_machine.master-bootstrap.default_ip_address}:/etc/rancher/rke2/rke2.yaml rke2.yaml"
-#     command = <<-EOT
-#       scp ${var.ssh_user}@${vsphere_virtual_machine.master-bootstrap.default_ip_address}:/etc/rancher/rke2/rke2.yaml rke2.yaml
-#       sed -i -e  "s/127.0.0.1/${vsphere_virtual_machine.master-bootstrap.default_ip_address}/g" rke2.yaml
-#     EOT
-#   }
-# }
-
-
-
-

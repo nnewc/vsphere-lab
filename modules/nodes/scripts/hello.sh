@@ -13,4 +13,4 @@ helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
 helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --set installCRDs=true --version 1.9
 
 # install Rancher
-helm install rancher rancher-stable/rancher --namespace cattle-system --create-namespace --set replicas=1  && kubectl -n cattle-system rollout status deploy/rancher
+helm install rancher rancher-stable/rancher --namespace cattle-system --create-namespace --set replicas=1 --set hostname=https://10-7-2-181.nip.io && kubectl -n cattle-system rollout status deploy/rancher
