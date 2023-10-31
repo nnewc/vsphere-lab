@@ -7,7 +7,7 @@ output "worker-ip" {
 }
 
 output "ingress-ip" {
-   value = "${module.nodes.worker-ip[0]}.nip.io"
+   value = "${vsphere_virtual_machine.worker-vm[0].default_ip_address}.nip.io"
 }
 
 # output "leader-ip" {

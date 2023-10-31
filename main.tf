@@ -1,17 +1,4 @@
-terraform {
-  required_providers {
-    vsphere = {
-      source  = "hashicorp/vsphere"
-      version = "2.5.0"
-    }
 
-    rancher = {
-      source = "rancher/rancher2"
-      version = "3.2.0"
-    }
-
-  }
-}
 
 provider "vsphere" {
   user           = "${var.vsphere_user}"
@@ -20,17 +7,7 @@ provider "vsphere" {
   allow_unverified_ssl = true
 }
 
-# resource "tls_private_key" "ssh" {
-#   algorithm = "RSA"
-#   rsa_bits  = 4096
-# }
 
-
-# resource "local_file" "ssh_pem" {
-#   filename        = "cluster/${var.cluster_name}.pem"
-#   content         = tls_private_key.ssh.private_key_pem
-#   file_permission = "0600"
-# }
 
 module "nodes" {
   source = "./modules/nodes"
@@ -54,4 +31,5 @@ module "nodes" {
   registry_user                     = var.registry_user
   registry_password                 = var.registry_password
   system_default_registry          = var.system_default_registry
-}  
+}
+
