@@ -11,7 +11,7 @@ resource "vsphere_virtual_machine" "master-bootstrap" {
   folder           = var.vsphere_folder
   num_cpus         = var.cpu_count
   memory           = var.memory_size
-  guest_id         = "other4xLinux64Guest"
+  guest_id         = "other5xLinux64Guest"
   firmware         = "efi"
   
   # ovf_deploy {
@@ -87,7 +87,7 @@ resource "vsphere_virtual_machine" "master_nodes" {
   folder           = var.vsphere_folder
   num_cpus         = var.cpu_count
   memory           = var.memory_size
-  guest_id         = "other4xLinux64Guest"
+  guest_id         = "other5xLinux64Guest"
   firmware         = "efi"
   
   # ovf_deploy {
@@ -139,7 +139,7 @@ resource "vsphere_virtual_machine" "worker-vm" {
   folder           = var.vsphere_folder
   num_cpus         = var.cpu_count
   memory           = var.memory_size
-  guest_id         = "other4xLinux64Guest"
+  guest_id         = "other5xLinux64Guest"
   firmware         = "efi"
   
   # ovf_deploy {

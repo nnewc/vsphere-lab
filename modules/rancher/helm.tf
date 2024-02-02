@@ -1,6 +1,6 @@
 provider "helm" {
   kubernetes {
-    config_path = module.kubeconfig.filepath
+    config_path = var.kubeconfig_filepath
   }
  # private registry
   registry {
@@ -10,14 +10,7 @@ provider "helm" {
   }
 }
 
-module "kubeconfig" {
-  source = "./modules/kubeconfig"
-  ssh_host = module.nodes.bootstrap-ip
-  ssh_user = var.ssh_user
-}
-
 resource "helm_release" "cert-manager" {
-  depends_on = [ module.nodes ]
   name       = "cert-manager"
 
   repository        = "https://charts.jetstack.io"
@@ -41,10 +34,11 @@ resource "helm_release" "rancher" {
   #version           = ""
   namespace         = "cattle-system"
   create_namespace  = "true"
+  version           = var.rancher_version
 
   set {
     name  = "hostname"
-    value = "${module.nodes.worker-ip[0]}.nip.io"
+    value = var.rancher_server
   }
 
   set {
@@ -54,7 +48,12 @@ resource "helm_release" "rancher" {
 
   set {
     name  = "systemDefaultRegistry"
-    value = "${var.system_default_registry}"
+    value = var.system_default_registry
+  }
+
+  set {
+    name = "bootstrapPassword"
+    value = "admin"
   }
 
 }

@@ -14,6 +14,13 @@ users:
     gecos: System Account for Running etcd Service
     sudo: false
     system: true
+yum_repos:
+  rancher:
+    name: Rancher RPMs
+    baseurl: https://rpm.rancher.io/rancher/production/centos/9/noarch
+    enabled: 1 
+    gpgcheck: 1 
+    gpgkey: https://rpm.rancher.io/public.key
 packages:
 - vim
 - bash-completion

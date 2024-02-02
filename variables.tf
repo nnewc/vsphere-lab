@@ -23,10 +23,6 @@ variable "cpu_count" {
   default = 4
 }
 
-variable "memory_size" {
-  type = number
-  default = 8192
-}
 
 variable "node_master_disk_size" {
   description = "size of disk on master nodes in GB"
@@ -59,7 +55,12 @@ variable "clone_from" {
 
 variable "rke2_version" {
   type = string
-  default = "v1.24.17+rke2r1"
+  default = ""
+}
+
+variable "rke2_channel" {
+  type = string
+  default = "stable"
 }
 
 variable "vm_template_name" {
@@ -84,7 +85,6 @@ variable "vsphere_user" {
 # vsphere account password. empty by default.
 variable "vsphere_password" {
   type = string
-  
 }
 
 # vsphere server, defaults to localhost
@@ -165,6 +165,11 @@ variable "registry_password" {
 }
 
 variable "system_default_registry" {
+  type = string
+  default = ""
+}
+
+variable "rancher_admin_password" {
   type = string
   default = ""
 }

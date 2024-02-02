@@ -59,7 +59,12 @@ variable "clone_from" {
 
 variable "rke2_version" {
   type = string
-  default = "v1.24.14+rke2r1"
+  default = ""
+}
+
+variable "rke2_channel" {
+  type = string
+  default = ""
 }
 
 variable "vm_template_name" {

@@ -69,7 +69,7 @@ data "cloudinit_config" "bootstrap_cloudconfig" {
         "runcmd": [
           # "echo \"tls-san:\" >> /etc/rancher/rke2/config.yaml",
           # "echo \"- ${vsphere_virtual_machine.master-bootstrap.default_ip_address}.nip.io",
-          "curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${var.rke2_version} sh -",
+          "curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${var.rke2_version} INSTALL_RKE2_CHANNEL=${var.rke2_channel} sh -",
           "systemctl enable rke2-server",
           "systemctl start rke2-server",
           "echo \"export KUBECONFIG=/etc/rancher/rke2/rke2.yaml\" >> /home/${var.ssh_user}/.bashrc",
@@ -150,7 +150,7 @@ data "cloudinit_config" "master_cloudconfig" {
       content = yamlencode({
         "runcmd": [
           "echo \"server: https://${vsphere_virtual_machine.master-bootstrap.default_ip_address}:9345\" >> /etc/rancher/rke2/config.yaml",
-          "curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${var.rke2_version} sh -",
+          "curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${var.rke2_version} INSTALL_RKE2_CHANNEL=${var.rke2_channel} sh -",
           "systemctl enable rke2-server",
           "systemctl start rke2-server",
           "echo \"export KUBECONFIG=/etc/rancher/rke2/rke2.yaml\" >> /home/${var.ssh_user}/.bashrc",
@@ -230,7 +230,7 @@ data "cloudinit_config" "worker_cloudconfig" {
       content = yamlencode({
         "runcmd": [
           "sysctl -p /etc/sysctl.d/90-kubelet.conf",
-          "curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE=agent INSTALL_RKE2_VERSION=${var.rke2_version} sh -",
+          "curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE=agent INSTALL_RKE2_VERSION=${var.rke2_version} INSTALL_RKE2_CHANNEL=${var.rke2_channel} sh -",
           "systemctl enable rke2-agent",
           "systemctl start rke2-agent",
           "mkdir /home/${var.ssh_user}/kube",
