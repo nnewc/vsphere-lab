@@ -191,10 +191,7 @@ data "cloudinit_config" "worker_cloudconfig" {
         "content": <<-EOT
           token: i-am-a-token
           server: https://${vsphere_virtual_machine.master-bootstrap.default_ip_address}:9345
-          write-kubeconfig-mode: 0640
-          profile: cis-1.6
-          kube-apiserver-arg:
-          - authorization-mode=RBAC,Node
+          profile: cis
           kubelet-arg:
           - protect-kernel-defaults=true
           - read-only-port=0
