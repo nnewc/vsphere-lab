@@ -35,6 +35,14 @@ data "cloudinit_config" "bootstrap_cloudconfig" {
             "content": file("${path.module}/config/90-kubelet.conf")
           },
           {
+            "path": "/var/lib/rancher/rke2/server/manifests/rke2-ingress-nginx-config.yaml",
+            "content": file("${path.module}/config/additional-manifests/rke2-ingress-nginx-config.yaml")
+          },
+           {
+            "path": "/etc/rancher/rke2/rke2-custom-pss.yaml",
+            "content": file("${path.module}/config/rke2-custom-pss.yaml")
+          },
+          {
             "path": "/etc/rancher/rke2/registries.yaml",
             "content": <<-EOT
               mirrors:
@@ -47,6 +55,13 @@ data "cloudinit_config" "bootstrap_cloudconfig" {
                     username: "${var.registry_user}"
                     password: "${var.registry_password}"
               EOT
+          },
+          {
+            "path": "/var/lib/rancher/rke2/server/manifests/kube-vip.yaml",
+            "content": templatefile("${path.module}/config/additional-manifests/kube-vip.yaml", {
+                vip_address = var.kubevip_vip_address
+                kubevip_tag = var.kubevip_tag
+            })
           }
         ],
       }
@@ -58,6 +73,7 @@ data "cloudinit_config" "bootstrap_cloudconfig" {
       content = templatefile("${path.module}/cloud-init/userdata.yaml", {
         ssh_pubkey = var.ssh_pubkey
         user       = var.ssh_user
+        hostname   = local.bootstrap_vm_name
       })
     }
 
@@ -67,8 +83,10 @@ data "cloudinit_config" "bootstrap_cloudconfig" {
       merge_type = "list(append)+dict(recurse_array)+str()"
       content = yamlencode({
         "runcmd": [
-          # "echo \"tls-san:\" >> /etc/rancher/rke2/config.yaml",
-          # "echo \"- ${vsphere_virtual_machine.master-bootstrap.default_ip_address}.nip.io",
+          "echo \"tls-san:\" >> /etc/rancher/rke2/config.yaml",
+          "echo \"- ${local.bootstrap_vm_name}\" >> /etc/rancher/rke2/config.yaml",
+          "echo \"- ${var.kubevip_vip_address}.nip.io\" >> /etc/rancher/rke2/config.yaml",
+          "echo \"- ${var.kubevip_vip_address}\" >> /etc/rancher/rke2/config.yaml",
           "curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${var.rke2_version} INSTALL_RKE2_CHANNEL=${var.rke2_channel} sh -",
           "systemctl enable rke2-server",
           "systemctl start rke2-server",
@@ -84,6 +102,7 @@ data "cloudinit_config" "master_cloudconfig" {
   gzip          = false
   base64_encode = true
 
+  count = var.ha_controlplane ? 2 : 0
   # Main cloud-init config file
   part {
     content_type = "text/cloud-config"
@@ -140,6 +159,7 @@ data "cloudinit_config" "master_cloudconfig" {
       content = templatefile("${path.module}/cloud-init/userdata.yaml", {
         ssh_pubkey = var.ssh_pubkey
         user       = var.ssh_user
+        hostname   = "${format("${var.vsphere_virtual_machine_name}-master-%03d",count.index + 1)}"
       })
     }
 
@@ -149,7 +169,7 @@ data "cloudinit_config" "master_cloudconfig" {
       merge_type = "list(append)+dict(recurse_array)+str()"
       content = yamlencode({
         "runcmd": [
-          "echo \"server: https://${vsphere_virtual_machine.master-bootstrap.default_ip_address}:9345\" >> /etc/rancher/rke2/config.yaml",
+          "echo \"server: https://${var.kubevip_vip_address}.nip.io:9345\" >> /etc/rancher/rke2/config.yaml",
           "curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${var.rke2_version} INSTALL_RKE2_CHANNEL=${var.rke2_channel} sh -",
           "systemctl enable rke2-server",
           "systemctl start rke2-server",
@@ -172,14 +192,17 @@ data "cloudinit_config" "worker_cloudconfig" {
   gzip          = false
   base64_encode = true
 
+  count = var.worker_node_count
+
   # Main cloud-init config file
   part {
     filename     = "cloud-config.yaml"
     content_type = "text/cloud-config"
     content = templatefile("${path.module}/cloud-init/userdata.yaml", {
-      ssh_pubkey = var.ssh_pubkey
+        ssh_pubkey = var.ssh_pubkey
         user       = var.ssh_user
-    })
+        hostname   = "${format("${var.vsphere_virtual_machine_name}-worker-%03d",count.index + 1)}"
+    }) 
   }
 
   part {
@@ -190,7 +213,7 @@ data "cloudinit_config" "worker_cloudconfig" {
         "path": "/etc/rancher/rke2/config.yaml",
         "content": <<-EOT
           token: i-am-a-token
-          server: https://${vsphere_virtual_machine.master-bootstrap.default_ip_address}:9345
+          server: https://${var.kubevip_vip_address}:9345
           profile: cis
           kubelet-arg:
           - protect-kernel-defaults=true

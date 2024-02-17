@@ -167,3 +167,13 @@ variable "system_default_registry" {
   type = string
   default = ""
 }
+
+variable "kubevip_vip_address" {
+  type = string
+  default = ""
+}
+
+variable "kubevip_tag" {
+  type = string
+  default = "v0.7.0"
+}

@@ -15,7 +15,7 @@ resource "helm_release" "cert-manager" {
 
   repository        = "https://charts.jetstack.io"
   chart             = "cert-manager"
-  version           = "1.7.3"
+  version           = "1.13.1"
   namespace         = "cert-manager"
   create_namespace  = "true"
 
@@ -29,9 +29,8 @@ resource "helm_release" "rancher" {
   depends_on = [ helm_release.cert-manager ]
   name       = "rancher"
 
-  repository        = "https://releases.rancher.com/server-charts/stable"
+  repository        = var.carbide_charts_url
   chart             = "rancher"
-  #version           = ""
   namespace         = "cattle-system"
   create_namespace  = "true"
   version           = var.rancher_version
@@ -41,10 +40,10 @@ resource "helm_release" "rancher" {
     value = var.rancher_server
   }
 
-  set {
-    name  = "global.cattle.psp.enabled"
-    value = "true"
-  }
+  # set {
+  #   name  = "global.cattle.psp.enabled"
+  #   value = "true"
+  # }
 
   set {
     name  = "systemDefaultRegistry"

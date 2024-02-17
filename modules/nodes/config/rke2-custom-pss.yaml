@@ -9,11 +9,11 @@ plugins:
       #other options: baseline, restricted
       enforce: "privileged"
       #other options: version-1.24, version-1.25
-      enforce-version: "v1.26"
+      enforce-version: "v1.27"
       audit: "restricted"
-      audit-version: "v1.26"
+      audit-version: "v1.27"
       warn: "restricted"
-      warn-version: "v1.26"
+      warn-version: "v1.27"
     exemptions:
       usernames: []
       runtimeClasses: []

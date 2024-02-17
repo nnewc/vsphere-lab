@@ -19,6 +19,7 @@ module "nodes" {
   vsphere_datastore                = var.vsphere_datastore
   vsphere_compute_cluster          = var.vsphere_compute_cluster
   vsphere_folder                   = var.vsphere_folder
+  memory_size                      = var.memory_size
   ssh_pubkey                       = var.ssh_pubkey
   ssh_user                         = var.ssh_user
   master_node_count                = var.master_node_count
@@ -29,6 +30,7 @@ module "nodes" {
   system_default_registry          = var.system_default_registry
   rke2_channel                     = var.rke2_channel
   rke2_version                     = var.rke2_version
+  kubevip_vip_address              = var.kubevip_ip
 }
 
 module "kubeconfig" {
@@ -39,8 +41,8 @@ module "kubeconfig" {
 
 module "rancher" {
   source = "./modules/rancher"
-  rancher_api_url = "https://${module.nodes.ingress-ip}.nip.io"
-  rancher_server = "${module.nodes.ingress-ip}.nip.io"
+  rancher_api_url = "https://${var.rancher_server}"
+  rancher_server = var.rancher_server
   rancher_admin_password = var.rancher_admin_password
   insecure_api = true
   registry_user = var.registry_user

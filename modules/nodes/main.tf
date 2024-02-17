@@ -1,16 +1,18 @@
 
 locals {
   cluster-name = "vsphere-lab"
+  bootstrap_vm_name = "${var.vsphere_virtual_machine_name}-master-000"
 }
 
 resource "vsphere_virtual_machine" "master-bootstrap" {
   
-  name             = "${var.vsphere_virtual_machine_name}-master-000"
+  name             = local.bootstrap_vm_name
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
   folder           = var.vsphere_folder
   num_cpus         = var.cpu_count
   memory           = var.memory_size
+  memory_hot_add_enabled = true
   guest_id         = "other5xLinux64Guest"
   firmware         = "efi"
   
@@ -44,7 +46,7 @@ resource "vsphere_virtual_machine" "master-bootstrap" {
 
 
   disk {
-    label = "${var.vsphere_virtual_machine_name}-master-000"
+    label = local.bootstrap_vm_name
     size  = var.node_master_disk_size
     eagerly_scrub    = data.vsphere_virtual_machine.template.disks.0.eagerly_scrub
     thin_provisioned = data.vsphere_virtual_machine.template.disks.0.thin_provisioned
@@ -55,7 +57,7 @@ resource "vsphere_virtual_machine" "master-bootstrap" {
   
   extra_config = {
     "guestinfo.metadata"          = base64encode(templatefile("${path.module}/cloud-init/metadata.yaml", {
-      hostname = "${var.vsphere_virtual_machine_name}-master-000"
+      hostname = "${local.bootstrap_vm_name}"
     }))
     "guestinfo.metadata.encoding" = "base64"
     "guestinfo.userdata"          = "${data.cloudinit_config.bootstrap_cloudconfig.rendered}"
@@ -87,6 +89,7 @@ resource "vsphere_virtual_machine" "master_nodes" {
   folder           = var.vsphere_folder
   num_cpus         = var.cpu_count
   memory           = var.memory_size
+  memory_hot_add_enabled = true
   guest_id         = "other5xLinux64Guest"
   firmware         = "efi"
   
@@ -117,7 +120,7 @@ resource "vsphere_virtual_machine" "master_nodes" {
       hostname = "${format("${var.vsphere_virtual_machine_name}-master-%03d",count.index + 1)}"
     }))
     "guestinfo.metadata.encoding" = "base64"
-    "guestinfo.userdata"          = "${data.cloudinit_config.master_cloudconfig.rendered}"
+    "guestinfo.userdata"          = "${data.cloudinit_config.master_cloudconfig[count.index].rendered}"
     "guestinfo.userdata.encoding" = "base64"
   }
 
@@ -139,6 +142,7 @@ resource "vsphere_virtual_machine" "worker-vm" {
   folder           = var.vsphere_folder
   num_cpus         = var.cpu_count
   memory           = var.memory_size
+  memory_hot_add_enabled = true
   guest_id         = "other5xLinux64Guest"
   firmware         = "efi"
   
@@ -169,7 +173,7 @@ resource "vsphere_virtual_machine" "worker-vm" {
       hostname = "${format("${var.vsphere_virtual_machine_name}-worker-%03d",count.index)}"
     }))
     "guestinfo.metadata.encoding" = "base64"
-    "guestinfo.userdata"          = "${data.cloudinit_config.worker_cloudconfig.rendered}"
+    "guestinfo.userdata"          = "${data.cloudinit_config.worker_cloudconfig[count.index].rendered}"
     "guestinfo.userdata.encoding" = "base64"
   }
 

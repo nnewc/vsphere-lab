@@ -21,3 +21,4 @@ kubelet-arg:
 disable-cloud-controller: true
 node-taint: 
 - CriticalAddonsOnly=true:NoExecute
+pod-security-admission-config-file: /etc/rancher/rke2/rke2-custom-pss.yaml

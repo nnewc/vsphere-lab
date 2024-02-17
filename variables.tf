@@ -21,8 +21,13 @@ variable "cluster_name" {
 variable "cpu_count" {
   type = number
   default = 4
+  description = "number of CPUs on cluster nodes"
 }
 
+variable "memory_size" {
+  type = number
+  description = "size of memory on cluster nodes"
+}
 
 variable "node_master_disk_size" {
   description = "size of disk on master nodes in GB"
@@ -149,7 +154,7 @@ variable "download" {
 # }
 
 variable "kubevip_ip" {
-  description = "An ip address used for kube-vip"
+  description = "kube-vip virtual IP address (VIP)"
   type = string
   default = ""
 }
@@ -170,6 +175,11 @@ variable "system_default_registry" {
 }
 
 variable "rancher_admin_password" {
+  type = string
+  default = ""
+}
+
+variable "rancher_server" {
   type = string
   default = ""
 }
