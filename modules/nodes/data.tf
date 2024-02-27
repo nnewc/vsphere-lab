@@ -110,19 +110,6 @@ data "cloudinit_config" "master_cloudconfig" {
     content = yamlencode(
       {
         "write_files" : [
-          # write_files examples...
-          # {
-          #   "path" : "/etc/foo.conf",
-          #   "content" : "foo contents",
-          # },
-          # {
-          #   "path" : "/etc/bar.conf",
-          #   "content" : file("bar.conf"),
-          # },
-          # {
-          #   "path" : "/etc/baz.conf",
-          #   "content" : templatefile("baz.tpl.conf", { SOME_VAR = "qux" }),
-          # },
           {
             "path": "/etc/rancher/rke2/audit.yaml",
             "content": file("${path.module}/config/rke2-audit-policy.yaml")
@@ -173,7 +160,8 @@ data "cloudinit_config" "master_cloudconfig" {
       merge_type = "list(append)+dict(recurse_array)+str()"
       content = yamlencode({
         "runcmd": [
-          "echo \"server: https://${var.kubevip_vip_address}.nip.io:9345\" >> /etc/rancher/rke2/config.yaml",
+          "echo \"server: https://${var.kubevip_vip_address}:9345\" >> /etc/rancher/rke2/config.yaml",
+          "echo \"tls-san:\" >> /etc/rancher/rke2/config.yaml",
           "echo \"- ${format("${var.vsphere_virtual_machine_name}-master-%03d",count.index + 1)}\" >> /etc/rancher/rke2/config.yaml",
           "echo \"- ${var.kubevip_vip_address}.nip.io\" >> /etc/rancher/rke2/config.yaml",
           "echo \"- ${var.kubevip_vip_address}\" >> /etc/rancher/rke2/config.yaml",

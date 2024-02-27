@@ -23,3 +23,5 @@ resource "rancher2_catalog_v2" "rgs-carbide" {
   name = "rgs-carbide"
   url = var.carbide_charts_url
 }
+
+

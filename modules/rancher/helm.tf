@@ -40,6 +40,7 @@ resource "helm_release" "rancher" {
   namespace         = "cattle-system"
   create_namespace  = "true"
   version           = var.rancher_version
+  timeout           = 600     # slow image pulls 😭
 
   set {
     name  = "hostname"

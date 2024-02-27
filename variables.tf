@@ -65,7 +65,7 @@ variable "rke2_version" {
 
 variable "rke2_channel" {
   type = string
-  default = "stable"
+  default = ""
 }
 
 variable "vm_template_name" {
@@ -180,6 +180,11 @@ variable "rancher_admin_password" {
 }
 
 variable "rancher_server" {
+  type = string
+  default = ""
+}
+
+variable "rancher_version" {
   type = string
   default = ""
 }
