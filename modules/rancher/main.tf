@@ -7,6 +7,8 @@ terraform {
   }
 }
 
+
+
 provider "rancher2" {
   alias = "admin"
   api_url = rancher2_bootstrap.admin.url

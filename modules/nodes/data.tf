@@ -135,6 +135,10 @@ data "cloudinit_config" "master_cloudconfig" {
             "path": "/etc/sysctl.d/90-kubelet.conf",
             "content": file("${path.module}/config/90-kubelet.conf")
           },
+           {
+            "path": "/etc/rancher/rke2/rke2-custom-pss.yaml",
+            "content": file("${path.module}/config/rke2-custom-pss.yaml")
+          },
           {
             "path": "/etc/rancher/rke2/registries.yaml",
             "content": <<-EOT
@@ -170,6 +174,9 @@ data "cloudinit_config" "master_cloudconfig" {
       content = yamlencode({
         "runcmd": [
           "echo \"server: https://${var.kubevip_vip_address}.nip.io:9345\" >> /etc/rancher/rke2/config.yaml",
+          "echo \"- ${format("${var.vsphere_virtual_machine_name}-master-%03d",count.index + 1)}\" >> /etc/rancher/rke2/config.yaml",
+          "echo \"- ${var.kubevip_vip_address}.nip.io\" >> /etc/rancher/rke2/config.yaml",
+          "echo \"- ${var.kubevip_vip_address}\" >> /etc/rancher/rke2/config.yaml",
           "curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${var.rke2_version} INSTALL_RKE2_CHANNEL=${var.rke2_channel} sh -",
           "systemctl enable rke2-server",
           "systemctl start rke2-server",
@@ -253,11 +260,6 @@ data "cloudinit_config" "worker_cloudconfig" {
           "curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE=agent INSTALL_RKE2_VERSION=${var.rke2_version} INSTALL_RKE2_CHANNEL=${var.rke2_channel} sh -",
           "systemctl enable rke2-agent",
           "systemctl start rke2-agent",
-          "mkdir /home/${var.ssh_user}/kube",
-          # configure bash environment
-          "echo \"export KUBECONFIG=/etc/rancher/rke2/rke2.yaml\" >> /home/${var.ssh_user}/.bashrc",
-          "echo \"export PATH=$PATH:/var/lib/rancher/rke2/bin\" >> /home/${var.ssh_user}/.bashrc",
-          "echo \"export CRI_CONFIG_FILE=/var/lib/rancher/rke2/agent/etc/crictl.yaml\" >> /home/${var.ssh_user}/.bashrc",
           # set selinux context for istio-cni
           "mkdir -p /var/run/istio-cni && semanage fcontext -a -t container_file_t /var/run/istio-cni && restorecon -v /var/run/istio-cni"
         ]})

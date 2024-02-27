@@ -13,7 +13,7 @@ users:
    # etcd User is Required for Installing with CIS Profile Enabled
   - name: etcd
     gecos: System Account for Running etcd Service
-    sudo: false
+    sudo: null
     system: true
 yum_repos:
   rancher:

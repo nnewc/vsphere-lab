@@ -134,6 +134,8 @@ resource "vsphere_virtual_machine" "master_nodes" {
 }
 
 resource "vsphere_virtual_machine" "worker-vm" {
+  depends_on = [ vsphere_virtual_machine.master-bootstrap ]
+
   count            = var.worker_node_count
 
   name             = "${format("${var.vsphere_virtual_machine_name}-worker-%03d",count.index)}"
@@ -183,5 +185,22 @@ resource "vsphere_virtual_machine" "worker-vm" {
       ept_rvi_mode,
       hv_mode
     ]
+  }
+
+  provisioner "remote-exec" {
+    
+    inline = [
+      "cloud-init status --wait > /dev/null",
+      #"until $(curl --output /dev/null --silent --head --fail http://${var.kubevip_vip_address}/healthz); do printf '.'; sleep 5; done"
+    ]
+    
+    connection {
+      type        = "ssh"
+      host        = self.default_ip_address
+      user        = var.ssh_user
+      certificate = var.ssh_pubkey
+      agent       = true
+      script_path = "/home/${var.ssh_user}/user-data-check.sh"
+    }
   }
 }

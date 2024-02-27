@@ -11,8 +11,9 @@ provider "helm" {
 }
 
 resource "helm_release" "cert-manager" {
-  name       = "cert-manager"
 
+  name       = "cert-manager"
+  
   repository        = "https://charts.jetstack.io"
   chart             = "cert-manager"
   version           = "1.13.1"
@@ -22,6 +23,11 @@ resource "helm_release" "cert-manager" {
   set {
     name  = "installCRDs"
     value = "true"
+  }
+
+  set {
+    name = "startupapicheck.timeout"
+    value = "5m"
   }
 }
 
