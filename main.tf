@@ -20,6 +20,8 @@ module "nodes" {
   vsphere_compute_cluster          = var.vsphere_compute_cluster
   vsphere_folder                   = var.vsphere_folder
   memory_size                      = var.memory_size
+  node_master_disk_size            = var.node_master_disk_size
+  node_worker_disk_size            = var.node_worker_disk_size
   ssh_pubkey                       = var.ssh_pubkey
   ssh_user                         = var.ssh_user
   master_node_count                = var.master_node_count

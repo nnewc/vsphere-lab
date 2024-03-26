@@ -32,6 +32,12 @@ variable "memory_size" {
 variable "node_master_disk_size" {
   description = "size of disk on master nodes in GB"
   type = number
+  default = 40
+}
+
+variable "node_worker_disk_size" {
+  description = "size of disk on master nodes in GB"
+  type = number
   default = 60
 }
 

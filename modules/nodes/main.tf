@@ -162,7 +162,7 @@ resource "vsphere_virtual_machine" "worker-vm" {
 
   disk {
     label = "${format("${var.vsphere_virtual_machine_name}-worker-%03d-disk",count.index)}"
-    size  = var.node_master_disk_size
+    size  = var.node_worker_disk_size
     eagerly_scrub    = data.vsphere_virtual_machine.template.disks.0.eagerly_scrub
     thin_provisioned = data.vsphere_virtual_machine.template.disks.0.thin_provisioned
   }
