@@ -25,7 +25,7 @@ resource "vsphere_virtual_machine" "master-bootstrap" {
     
     inline = [
       "echo 'Waiting for cloud-init to complete...'",
-      "cloud-init status --wait > /dev/null",
+      "sudo cloud-init status --wait > /dev/null",
       "echo 'Completed cloud-init!'",
     ]
     
@@ -190,7 +190,7 @@ resource "vsphere_virtual_machine" "worker-vm" {
   provisioner "remote-exec" {
     
     inline = [
-      "cloud-init status --wait > /dev/null",
+      "sudo cloud-init status --wait > /dev/null",
       #"until $(curl --output /dev/null --silent --head --fail http://${var.kubevip_vip_address}/healthz); do printf '.'; sleep 5; done"
     ]
     
