@@ -23,6 +23,7 @@ yum_repos:
     gpgcheck: 1 
     gpgkey: https://rpm.rancher.io/public.key
 packages:
+-  policycoreutils-python-utils
 - vim
 - bash-completion
 - jq
